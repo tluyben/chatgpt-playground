@@ -1,4 +1,12 @@
-# Getting Started with Create React App
+# Setting up 
+
+- Make sure to have Node 17+ installed with yarn/npm/npx 
+- Clone this project: https://github.com/tluyben/chatgpt-api
+- Read the docs over there and set it up properly
+- Run the server on your local machine (it will run on port 3001)
+- Start the playground with npm install; npm start or yarn; yarn start 
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
