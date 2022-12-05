@@ -38,46 +38,6 @@ const useStyles = makeStyles({
         overflowY: 'auto'
     }
 });
-function generateTable(data) {
-    // Start the table with the header row
-    let table = "|";
-    // Add the table headers based on the keys of the first object in the input data
-    for (const key of Object.keys(data[0])) {
-        table += ` ${key} |`;
-    }
-    // Add a line to separate the header row from the rest of the table
-    table += "\n|";
-    // Calculate the maximum width of each column
-    const columnWidths = {};
-    for (const key of Object.keys(data[0])) {
-        // Set the initial column width to the length of the column header
-        columnWidths[key] = key.length;
-        // Check the length of each value for this column
-        for (const obj of data) {
-            if (obj[key].length > columnWidths[key]) {
-                columnWidths[key] = obj[key].length;
-            }
-        }
-    }
-    // Add dashes for each column
-    for (const key of Object.keys(data[0])) {
-        table += ` ${'-'.repeat(columnWidths[key])} |`;
-    }
-    // Add a line break
-    table += "\n";
-    // Add a row for each object in the input data
-    for (const obj of data) {
-        table += "|";
-        // Add the values for each key in the object
-        for (const key of Object.keys(obj)) {
-            table += ` ${obj[key].padEnd(columnWidths[key])} |`;
-        }
-        // Add a line break
-        table += "\n";
-    }
-    // Return the completed table
-    return table;
-}
 
 const Chat = () => {
     const classes = useStyles();
@@ -132,10 +92,11 @@ const Chat = () => {
                         const response = await fetch(`/api/${base}/${cmd}?${cmdData1.var}=${encodeURIComponent(code)}`);
                         const cmdData2 = await response.json();
 
-                        if (cmdData2.error) {
+                        if (cmdData2?.error) {
                             setChat([...chat, { from: 'ME', msg: command, time }, { from: 'AI', msg: cmdData2.error, time }])
 
                         } else {
+
                             setChat([...chat, { from: 'ME', msg: command, time }, { from: 'AI', msg: `Found ${cmdData2.length} results\n\n` + tablemark(cmdData2), time }])
 
 
@@ -147,7 +108,6 @@ const Chat = () => {
             } else {
                 // ? 
             }
-            chatWindowRef.current.scrollTo(0, chatWindowRef.current.scrollHeight);
         } catch (error) {
             // add the error to the chat as AI 
             setIsLoading(false);
@@ -156,6 +116,8 @@ const Chat = () => {
 
             console.error(error);
         }
+        chatWindowRef.current.scrollTo(0, chatWindowRef.current.scrollHeight);
+
     }
     async function addMessage(from, msg) {
         if (msg.trim() === '') return
