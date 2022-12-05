@@ -23,7 +23,7 @@ const useStyles = makeStyles({
     },
     chatSection: {
         width: '100%',
-        height: '80vh'
+        height: '100vh'
     },
     headBG: {
         backgroundColor: '#e0e0e0'
@@ -32,7 +32,7 @@ const useStyles = makeStyles({
         borderRight: '1px solid #e0e0e0'
     },
     messageArea: {
-        height: '70vh',
+        height: '87vh',
         overflowY: 'auto'
     }
 });
@@ -83,12 +83,13 @@ const Chat = () => {
     }
     return (
         <div>
-            {isLoading && <CircularProgress />}
-            <Grid container>
-                <Grid item xs={12} >
-                    <Typography variant="h5" className="header-message">ChatGPT playground</Typography>
-                </Grid>
-            </Grid>
+            {isLoading && <CircularProgress style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+            }} />}
+
             <Grid container component={Paper} className={classes.chatSection}>
 
                 <Grid item xs={12}>
