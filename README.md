@@ -1,4 +1,9 @@
-# Setting up 
+# What is this? 
+
+This is a fast & dirty react chat client for experimenting with chatgpt, dall-e, sd, etc on your localhost. It's meant to quickly 
+prototype ideas to test viability. 
+
+## Setting up 
 
 - Make sure to have Node 17+ installed with yarn/npm/npx 
 - Clone this project: https://github.com/tluyben/chatgpt-api
