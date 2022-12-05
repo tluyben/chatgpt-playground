@@ -9,7 +9,7 @@ prototype ideas to test viability.
 - Clone this project: https://github.com/tluyben/chatgpt-api
 - Read the docs over there and set it up properly
 - Run the server on your local machine (it will run on port 3001)
-- Start the playground with npm install; npm start or yarn; yarn start 
+- cd to the chatgpt-playgraound directory (this project) and start the playground with npm install; npm start or yarn; yarn start 
 
 ## Getting Started with Create React App
 
