@@ -16,6 +16,8 @@ import Fab from '@material-ui/core/Fab';
 import SendIcon from '@material-ui/icons/Send';
 import ReactMarkdown from 'react-markdown'
 import CircularProgress from '@material-ui/core/CircularProgress';
+import tablemark from "tablemark"
+import remarkGfm from 'remark-gfm'
 
 const useStyles = makeStyles({
     table: {
@@ -36,6 +38,46 @@ const useStyles = makeStyles({
         overflowY: 'auto'
     }
 });
+function generateTable(data) {
+    // Start the table with the header row
+    let table = "|";
+    // Add the table headers based on the keys of the first object in the input data
+    for (const key of Object.keys(data[0])) {
+        table += ` ${key} |`;
+    }
+    // Add a line to separate the header row from the rest of the table
+    table += "\n|";
+    // Calculate the maximum width of each column
+    const columnWidths = {};
+    for (const key of Object.keys(data[0])) {
+        // Set the initial column width to the length of the column header
+        columnWidths[key] = key.length;
+        // Check the length of each value for this column
+        for (const obj of data) {
+            if (obj[key].length > columnWidths[key]) {
+                columnWidths[key] = obj[key].length;
+            }
+        }
+    }
+    // Add dashes for each column
+    for (const key of Object.keys(data[0])) {
+        table += ` ${'-'.repeat(columnWidths[key])} |`;
+    }
+    // Add a line break
+    table += "\n";
+    // Add a row for each object in the input data
+    for (const obj of data) {
+        table += "|";
+        // Add the values for each key in the object
+        for (const key of Object.keys(obj)) {
+            table += ` ${obj[key].padEnd(columnWidths[key])} |`;
+        }
+        // Add a line break
+        table += "\n";
+    }
+    // Return the completed table
+    return table;
+}
 
 const Chat = () => {
     const classes = useStyles();
@@ -54,8 +96,70 @@ const Chat = () => {
             addMessage('ME', message);
         }
     }
+
+    async function handleCommand(command) {
+        const _cmd = command.split(' ');
+        const base = _cmd[0].substring(1);
+        const cmd = _cmd[1]
+        const time = new Date().toLocaleTimeString().slice(0, 5)
+        try {
+            setIsLoading(true);
+            const response = await fetch(`/api/${base}/${cmd}`);
+            const cmdData1 = await response.json();
+            setIsLoading(false);
+
+            // add the response from the server to the chat
+            //setChat([...chat, { from, msg, time }, { from: 'AI', msg: data.join('\n'), time }])
+            if (cmdData1.prompt) {
+                setIsLoading(true);
+                let formattedData
+                if (cmdData1.data) {
+                    formattedData = JSON.stringify(cmdData1.data)
+                } else {
+                    // data is the rest of our command after base/cmd
+                    formattedData = _cmd.slice(2).join(' ')
+                }
+                const response = await fetch('/api/send?message= ' + encodeURIComponent(cmdData1.prompt + '\n\n' + formattedData));
+                const gptData = await response.json();
+                if (cmdData1.type === 'code' && cmdData1.var) {
+                    // we need to parse the code from the markdown in _data.join('\n')
+                    const code = gptData.join('\n').match(/```(.*)```/s)[0].replace(/```css/g, '').replace(/```sql/g, '').replace(/```/g, '')
+                    if (!code) {
+                        setChat([...chat, { from: 'ME', msg: command, time }, { from: 'AI', msg: gptData.join('\n'), time }])
+
+                    } else {
+                        // and another trip to to send the code; 
+                        const response = await fetch(`/api/${base}/${cmd}?${cmdData1.var}=${encodeURIComponent(code)}`);
+                        const cmdData2 = await response.json();
+
+                        if (cmdData2.error) {
+                            setChat([...chat, { from: 'ME', msg: command, time }, { from: 'AI', msg: cmdData2.error, time }])
+
+                        } else {
+                            setChat([...chat, { from: 'ME', msg: command, time }, { from: 'AI', msg: `Found ${cmdData2.length} results\n\n` + tablemark(cmdData2), time }])
+
+
+                        }
+                        console.log(cmdData2)
+                    }
+                }
+                setIsLoading(false);
+            } else {
+                // ? 
+            }
+            chatWindowRef.current.scrollTo(0, chatWindowRef.current.scrollHeight);
+        } catch (error) {
+            // add the error to the chat as AI 
+            setIsLoading(false);
+
+            setChat([...chat, { from: 'ME', msg: command, time }, { from: 'AI', msg: 'I do not recognize this command', time }])
+
+            console.error(error);
+        }
+    }
     async function addMessage(from, msg) {
         if (msg.trim() === '') return
+
         // get the current time hh:mm
         const time = new Date().toLocaleTimeString().slice(0, 5)
         setChat([...chat, { from, msg, time }])
@@ -63,6 +167,10 @@ const Chat = () => {
         setTimeout(() => {
             chatWindowRef.current.scrollTo(0, chatWindowRef.current.scrollHeight);
         }, 200);
+        if (msg.trim().startsWith('/')) {
+            await handleCommand(msg.trim());
+            return
+        }
         //chatWindowRef.current.scrollTo(0, chatWindowRef.current.scrollHeight);
         if (from === 'ME') {
             // send the message to the server
@@ -100,7 +208,7 @@ const Chat = () => {
                                 <Grid container>
                                     <Grid item xs={12}>
 
-                                        <ListItemText align={c.from === 'AI' ? 'left' : 'right'} primary={<ReactMarkdown>{c.msg}</ReactMarkdown>}> </ListItemText>
+                                        <ListItemText align={c.from === 'AI' ? 'left' : 'right'} primary={<ReactMarkdown remarkPlugins={[remarkGfm]}>{c.msg}</ReactMarkdown>}> </ListItemText>
                                     </Grid>
                                     <Grid item xs={12}>
                                         <ListItemText align={c.from === 'AI' ? 'left' : 'right'} secondary={c.from + ' at ' + c.time}></ListItemText>

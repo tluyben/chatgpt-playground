@@ -2,7 +2,7 @@
   "name": "chatgpt-playground",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:3001",
+  "proxy": "http://localhost:3002",
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
@@ -11,7 +11,9 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-markdown": "^8.0.4",
-    "react-scripts": "5.0.1"
+    "react-scripts": "5.0.1",
+    "remark-gfm": "^3.0.1",
+    "tablemark": "^3.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
