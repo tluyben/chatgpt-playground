@@ -183,7 +183,7 @@ const Chat = () => {
                     <Divider />
                     <Grid container style={{ padding: '20px' }}>
                         <Grid item xs={11}>
-                            <TextField id="outlined-basic-email" InputProps={{
+                            <TextField id="chat-input" InputProps={{
                                 disableUnderline: true,
                             }} onChange={handleChange} onKeyDown={keyPress} value={message} label="Type Something" fullWidth />
                         </Grid>
